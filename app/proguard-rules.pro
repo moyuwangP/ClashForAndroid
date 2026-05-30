@@ -22,6 +22,10 @@
 
 -dontobfuscate
 
+-keep public class * extends com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginRunner { *; }
+-keep public class com.github.kr328.clash.SwitchOnAction { *; }
+-keep public class com.github.kr328.clash.SwitchOffAction { *; }
+
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
     public static void checkNotNull(...);
     public static void checkExpressionValueIsNotNull(...);
