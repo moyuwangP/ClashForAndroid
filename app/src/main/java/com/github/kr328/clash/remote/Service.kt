@@ -5,10 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.github.kr328.clash.Tracker
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.common.util.intent
-import com.github.kr328.clash.log.SystemLogcat
 import com.github.kr328.clash.service.RemoteService
 import com.github.kr328.clash.service.remote.IRemoteService
 import com.github.kr328.clash.service.remote.unwrap
@@ -28,8 +26,6 @@ class Service(private val context: Application, val crashed: () -> Unit) {
         override fun onServiceDisconnected(name: ComponentName?) {
             remote.set(null)
 
-            Tracker.uploadLogcat(SystemLogcat.dumpCrash())
-
             if (System.currentTimeMillis() - lastCrashed < TOGGLE_CRASHED_INTERVAL) {
                 unbind()
 
@@ -37,8 +33,7 @@ class Service(private val context: Application, val crashed: () -> Unit) {
             }
 
             lastCrashed = System.currentTimeMillis()
-
-            Log.w("RemoteManager crashed")
+            Log.w("RemoteService killed or crashed")
         }
     }
 

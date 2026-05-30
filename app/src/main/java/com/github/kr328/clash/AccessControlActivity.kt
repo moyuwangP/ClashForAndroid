@@ -11,7 +11,10 @@ import com.github.kr328.clash.design.AccessControlDesign
 import com.github.kr328.clash.design.model.AppInfo
 import com.github.kr328.clash.design.util.toAppInfo
 import com.github.kr328.clash.service.store.ServiceStore
+import com.github.kr328.clash.util.startClashService
+import com.github.kr328.clash.util.stopClashService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
@@ -26,7 +29,15 @@ class AccessControlActivity : BaseActivity<AccessControlDesign>() {
 
         defer {
             withContext(Dispatchers.IO) {
+                val changed = selected != service.accessControlPackages
                 service.accessControlPackages = selected
+                if (clashRunning && changed) {
+                    stopClashService()
+                    while (clashRunning) {
+                        delay(200)
+                    }
+                    startClashService()
+                }
             }
         }
 
@@ -46,6 +57,7 @@ class AccessControlActivity : BaseActivity<AccessControlDesign>() {
                         AccessControlDesign.Request.ReloadApps -> {
                             design.patchApps(loadApps(selected))
                         }
+
                         AccessControlDesign.Request.SelectAll -> {
                             val all = withContext(Dispatchers.Default) {
                                 design.apps.map(AppInfo::packageName)
@@ -56,11 +68,13 @@ class AccessControlActivity : BaseActivity<AccessControlDesign>() {
 
                             design.rebindAll()
                         }
+
                         AccessControlDesign.Request.SelectNone -> {
                             selected.clear()
 
                             design.rebindAll()
                         }
+
                         AccessControlDesign.Request.SelectInvert -> {
                             val all = withContext(Dispatchers.Default) {
                                 design.apps.map(AppInfo::packageName).toSet() - selected
@@ -71,16 +85,14 @@ class AccessControlActivity : BaseActivity<AccessControlDesign>() {
 
                             design.rebindAll()
                         }
+
                         AccessControlDesign.Request.Import -> {
                             val clipboard = getSystemService<ClipboardManager>()
                             val data = clipboard?.primaryClip
 
                             if (data != null && data.itemCount > 0) {
-                                val all = withContext(Dispatchers.IO) {
-                                    val packages = data.getItemAt(0).text.split("\n").toSet()
-
-                                    design.apps.map(AppInfo::packageName).intersect(packages)
-                                }
+                                val packages = data.getItemAt(0).text.split("\n").toSet()
+                                val all = design.apps.map(AppInfo::packageName).intersect(packages)
 
                                 selected.clear()
                                 selected.addAll(all)
@@ -88,17 +100,16 @@ class AccessControlActivity : BaseActivity<AccessControlDesign>() {
 
                             design.rebindAll()
                         }
+
                         AccessControlDesign.Request.Export -> {
                             val clipboard = getSystemService<ClipboardManager>()
 
-                            withContext(Dispatchers.IO) {
-                                val data = ClipData.newPlainText(
-                                    "packages",
-                                    selected.joinToString("\n")
-                                )
+                            val data = ClipData.newPlainText(
+                                "packages",
+                                selected.joinToString("\n")
+                            )
 
-                                clipboard?.setPrimaryClip(data)
-                            }
+                            clipboard?.setPrimaryClip(data)
                         }
                     }
                 }
@@ -123,7 +134,10 @@ class AccessControlActivity : BaseActivity<AccessControlDesign>() {
                     it.packageName != packageName
                 }
                 .filter {
-                    it.packageName == "android" || it.requestedPermissions?.contains(INTERNET) == true
+                    it.applicationInfo != null
+                }
+                .filter {
+                    it.requestedPermissions?.contains(INTERNET) == true || it.applicationInfo!!.uid < android.os.Process.FIRST_APPLICATION_UID
                 }
                 .filter {
                     systemApp || !it.isSystemApp
@@ -137,6 +151,6 @@ class AccessControlActivity : BaseActivity<AccessControlDesign>() {
 
     private val PackageInfo.isSystemApp: Boolean
         get() {
-            return applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
+            return applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM) != 0
         }
 }

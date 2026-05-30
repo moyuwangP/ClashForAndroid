@@ -6,7 +6,6 @@ import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import com.github.kr328.clash.core.model.ProxySort
 import com.github.kr328.clash.core.model.TunnelState
-import com.github.kr328.clash.design.BuildConfig
 import com.github.kr328.clash.design.ProxyDesign
 import com.github.kr328.clash.design.R
 import com.github.kr328.clash.design.store.UiStore
@@ -36,14 +35,21 @@ class ProxyMenu(
                 requests.trySend(ProxyDesign.Request.ReLaunch)
             }
             R.id.single -> {
-                uiStore.proxySingleLine = true
+                uiStore.proxyLine = 1
+
+                updateConfig()
+
+                requests.trySend(ProxyDesign.Request.ReloadAll)
+            }
+            R.id.doubles -> {
+                uiStore.proxyLine = 2
 
                 updateConfig()
 
                 requests.trySend(ProxyDesign.Request.ReloadAll)
             }
             R.id.multiple -> {
-                uiStore.proxySingleLine = false
+                uiStore.proxyLine = 3
 
                 updateConfig()
 
@@ -76,9 +82,6 @@ class ProxyMenu(
             R.id.rule_mode -> {
                 requests.trySend(ProxyDesign.Request.PatchMode(TunnelState.Mode.Rule))
             }
-            R.id.script_mode -> {
-                requests.trySend(ProxyDesign.Request.PatchMode(TunnelState.Mode.Script))
-            }
             else -> return false
         }
 
@@ -89,14 +92,12 @@ class ProxyMenu(
         menu.menuInflater.inflate(R.menu.menu_proxy, menu.menu)
 
         menu.menu.apply {
-            findItem(R.id.script_mode).isVisible = BuildConfig.PREMIUM
-
             findItem(R.id.not_selectable).isChecked = uiStore.proxyExcludeNotSelectable
 
-            if (uiStore.proxySingleLine) {
-                findItem(R.id.single).isChecked = true
-            } else {
-                findItem(R.id.multiple).isChecked = true
+            when (uiStore.proxyLine){
+                1 -> findItem(R.id.single).isChecked = true
+                2 -> findItem(R.id.doubles).isChecked = true
+                3 -> findItem(R.id.multiple).isChecked = true
             }
 
             when (uiStore.proxySort) {
@@ -110,7 +111,7 @@ class ProxyMenu(
                 TunnelState.Mode.Direct -> findItem(R.id.direct_mode).isChecked = true
                 TunnelState.Mode.Global -> findItem(R.id.global_mode).isChecked = true
                 TunnelState.Mode.Rule -> findItem(R.id.rule_mode).isChecked = true
-                TunnelState.Mode.Script -> findItem(R.id.script_mode).isChecked = true
+                else -> {}
             }
         }
 

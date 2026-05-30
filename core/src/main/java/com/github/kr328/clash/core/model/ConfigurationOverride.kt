@@ -41,19 +41,52 @@ data class ConfigurationOverride(
     @SerialName("ipv6")
     var ipv6: Boolean? = null,
 
+    @SerialName("external-controller")
+    var externalController: String? = null,
+
+    @SerialName("external-controller-tls")
+    var externalControllerTLS: String? = null,
+
+    @SerialName("external-controller-cors")
+    var externalControllerCors: ExternalControllerCors = ExternalControllerCors(),
+
+    @SerialName("secret")
+    var secret: String? = null,
+
     @SerialName("hosts")
     var hosts: Map<String, String>? = null,
+
+    @SerialName("unified-delay")
+    var unifiedDelay: Boolean? = null,
+
+    @SerialName("geodata-mode")
+    var geodataMode: Boolean? = null,
+
+    @SerialName("tcp-concurrent")
+    var tcpConcurrent: Boolean? = null,
+
+    @SerialName("find-process-mode")
+    var findProcessMode: FindProcessMode? = null,
 
     @SerialName("dns")
     val dns: Dns = Dns(),
 
     @SerialName("clash-for-android")
     val app: App = App(),
+
+    @SerialName("sniffer")
+    val sniffer: Sniffer = Sniffer(),
+
+    @SerialName("geox-url")
+    val geoxurl: GeoXUrl = GeoXUrl(),
 ) : Parcelable {
     @Serializable
     data class Dns(
         @SerialName("enable")
         var enable: Boolean? = null,
+
+        @SerialName("prefer-h3")
+        var preferH3: Boolean? = null,
 
         @SerialName("listen")
         var listen: String? = null,
@@ -78,6 +111,9 @@ data class ConfigurationOverride(
 
         @SerialName("fake-ip-filter")
         var fakeIpFilter: List<String>? = null,
+
+        @SerialName("fake-ip-filter-mode")
+        var fakeIPFilterMode: FilterMode? = null,
 
         @SerialName("fallback-filter")
         val fallbackFilter: DnsFallbackFilter = DnsFallbackFilter(),
@@ -108,6 +144,17 @@ data class ConfigurationOverride(
     )
 
     @Serializable
+    enum class FindProcessMode {
+        @SerialName("off")
+        Off,
+
+        @SerialName("strict")
+        Strict,
+
+        @SerialName("always")
+        Always,
+    }
+    @Serializable
     enum class DnsEnhancedMode {
         @SerialName("normal")
         None,
@@ -118,6 +165,86 @@ data class ConfigurationOverride(
         @SerialName("fake-ip")
         FakeIp,
     }
+    @Serializable
+    enum class FilterMode {
+        @SerialName("blacklist")
+        BlackList,
+
+        @SerialName("whitelist")
+        WhiteList,
+    }
+
+    @Serializable
+    data class Sniffer(
+        @SerialName("enable")
+        var enable: Boolean? = null,
+
+        @SerialName("sniff")
+        var sniff: Sniff = Sniff(),
+
+        @SerialName("force-dns-mapping")
+        var forceDnsMapping: Boolean? = null,
+
+        @SerialName("parse-pure-ip")
+        var parsePureIp: Boolean? = null,
+
+        @SerialName("override-destination")
+        var overrideDestination: Boolean? = null,
+
+        @SerialName("force-domain")
+        var forceDomain: List<String>? = null,
+
+        @SerialName("skip-domain")
+        var skipDomain: List<String>? = null,
+
+        @SerialName("skip-src-address")
+        var skipSrcAddress: List<String>? = null,
+
+        @SerialName("skip-dst-address")
+        var skipDstAddress: List<String>? = null,
+    )
+
+    @Serializable
+    data class GeoXUrl(
+        @SerialName("geoip")
+        var geoip: String? = null,
+
+        @SerialName("mmdb")
+        var mmdb: String? = null,
+
+        @SerialName("geosite")
+        var geosite: String? = null,
+    )
+
+    @Serializable
+    data class ExternalControllerCors(
+        @SerialName("allow-origins")
+        var allowOrigins: List<String>? = null,
+
+        @SerialName("allow-private-network")
+        var allowPrivateNetwork: Boolean? = null,
+    )
+
+    @Serializable
+    data class Sniff(
+        @SerialName("HTTP")
+        var http: ProtocolConig = ProtocolConig(),
+
+        @SerialName("TLS")
+        var tls: ProtocolConig = ProtocolConig(),
+
+        @SerialName("QUIC")
+        var quic: ProtocolConig = ProtocolConig(),
+    )
+
+    @Serializable
+    data class ProtocolConig(
+        @SerialName("ports")
+        var ports: List<String>? = null,
+
+        @SerialName("override-destination")
+        var overrideDestination: Boolean? = null,
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         Parcelizer.encodeToParcel(serializer(), parcel, this)

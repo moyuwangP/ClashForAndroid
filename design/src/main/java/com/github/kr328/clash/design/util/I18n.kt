@@ -29,6 +29,7 @@ fun Provider.type(context: Context): String {
     val vehicle = when (vehicleType) {
         Provider.VehicleType.HTTP -> context.getString(R.string.http)
         Provider.VehicleType.File -> context.getString(R.string.file)
+        Provider.VehicleType.Inline -> context.getString(R.string.inline)
         Provider.VehicleType.Compatible -> context.getString(R.string.compatible)
     }
 
@@ -56,6 +57,12 @@ fun Date.format(
 
 fun Long.toBytesString(): String {
     return when {
+        this > 1024.0 * 1024 * 1024 * 1024 * 1024 * 1024 ->
+            String.format("%.2f EiB", (this.toDouble() / 1024 / 1024 / 1024 / 1024 / 1024 / 1024))
+        this > 1024.0 * 1024 * 1024 * 1024 * 1024 ->
+            String.format("%.2f PiB", (this.toDouble() / 1024 / 1024 / 1024 / 1024 / 1024))
+        this > 1024.0 * 1024 * 1024 * 1024 ->
+            String.format("%.2f TiB", (this.toDouble() / 1024 / 1024 / 1024 / 1024))
         this > 1024 * 1024 * 1024 ->
             String.format("%.2f GiB", (this.toDouble() / 1024 / 1024 / 1024))
         this > 1024 * 1024 ->
@@ -65,4 +72,12 @@ fun Long.toBytesString(): String {
         else ->
             "$this Bytes"
     }
+}
+
+fun Double.toProgress(): Int {
+    return this.toInt()
+}
+fun Long.toDateStr(): String {
+    val simpleDateFormat =SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    return simpleDateFormat.format(Date(this))
 }

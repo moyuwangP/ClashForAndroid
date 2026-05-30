@@ -1,10 +1,10 @@
 package config
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 
-	"github.com/Dreamacro/clash/constant"
+	"github.com/metacubex/mihomo/constant"
 )
 
 type OverrideSlot int
@@ -14,7 +14,7 @@ const (
 	OverrideSlotSession
 )
 
-const defaultPersistOverride = `{"dns":{"enable": false}, "redir-port": 0, "tproxy-port": 0}`
+const defaultPersistOverride = `{}`
 const defaultSessionOverride = `{}`
 
 var sessionOverride = defaultSessionOverride
@@ -31,7 +31,7 @@ func ReadOverride(slot OverrideSlot) string {
 			return defaultPersistOverride
 		}
 
-		buf, err := ioutil.ReadAll(file)
+		buf, err := io.ReadAll(file)
 		if err != nil {
 			return defaultPersistOverride
 		}

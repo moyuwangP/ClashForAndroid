@@ -8,6 +8,7 @@ import android.os.IBinder
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.github.kr328.clash.common.compat.startForegroundServiceCompat
+import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.common.util.fileName
 import com.github.kr328.clash.common.util.intent
 import com.github.kr328.clash.common.util.ticker
@@ -27,6 +28,7 @@ import kotlinx.coroutines.withContext
 import java.io.OutputStreamWriter
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import com.github.kr328.clash.design.R
 
 class LogcatActivity : BaseActivity<LogcatDesign>() {
     private var conn: ServiceConnection? = null
@@ -47,6 +49,7 @@ class LogcatActivity : BaseActivity<LogcatDesign>() {
         val messages = try {
             LogcatReader(this, file).readAll()
         } catch (e: Exception) {
+            Log.e("Fail to read log file ${file.fileName}: ${e.message}")
             return showInvalid()
         }
 
@@ -67,7 +70,7 @@ class LogcatActivity : BaseActivity<LogcatDesign>() {
                 }
                 LogcatDesign.Request.Export -> {
                     val output = startActivityForResult(
-                        ActivityResultContracts.CreateDocument(),
+                        ActivityResultContracts.CreateDocument("text/plain"),
                         file.fileName
                     )
 
@@ -109,7 +112,7 @@ class LogcatActivity : BaseActivity<LogcatDesign>() {
                     when (it) {
                         LogcatDesign.Request.Close -> {
                             stopService(LogcatService::class.intent)
-
+                            startActivity(LogsActivity::class.intent)
                             finish()
                         }
                         else -> Unit

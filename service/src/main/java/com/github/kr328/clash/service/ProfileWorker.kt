@@ -9,12 +9,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.github.kr328.clash.common.compat.getColorCompat
 import com.github.kr328.clash.common.compat.pendingIntentFlags
+import com.github.kr328.clash.common.compat.startForegroundCompat
 import com.github.kr328.clash.common.constants.Components
 import com.github.kr328.clash.common.constants.Intents
 import com.github.kr328.clash.common.id.UndefinedIds
 import com.github.kr328.clash.common.util.setUUID
 import com.github.kr328.clash.common.util.uuid
 import com.github.kr328.clash.service.data.ImportedDao
+import com.github.kr328.clash.service.util.sendProfileUpdateCompleted
+import com.github.kr328.clash.service.util.sendProfileUpdateFailed
 import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -121,7 +124,7 @@ class ProfileWorker : BaseService() {
             .setOnlyAlertOnce(true)
             .build()
 
-        startForeground(R.id.nf_profile_worker, notification)
+        startForegroundCompat(R.id.nf_profile_worker, notification)
     }
 
     private suspend inline fun processing(name: String, block: () -> Unit) {
@@ -176,6 +179,8 @@ class ProfileWorker : BaseService() {
 
         NotificationManagerCompat.from(this)
             .notify(id, notification)
+
+        sendProfileUpdateCompleted(uuid)
     }
 
     private fun failed(uuid: UUID, name: String, reason: String) {
@@ -191,6 +196,8 @@ class ProfileWorker : BaseService() {
 
         NotificationManagerCompat.from(this)
             .notify(id, notification)
+
+        sendProfileUpdateFailed(uuid, reason)
     }
 
     companion object {

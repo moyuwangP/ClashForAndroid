@@ -18,7 +18,6 @@ import com.github.kr328.clash.design.util.applyFrom
 import com.github.kr328.clash.design.util.layoutInflater
 import com.github.kr328.clash.design.util.resolveThemedColor
 import com.github.kr328.clash.design.util.root
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,11 +41,11 @@ class ProxyDesign(
     private val binding = DesignProxyBinding
         .inflate(context.layoutInflater, context.root, false)
 
-    private val config = ProxyViewConfig(context, uiStore.proxySingleLine)
+    private var config = ProxyViewConfig(context, uiStore.proxyLine)
 
     private val menu: ProxyMenu by lazy {
         ProxyMenu(context, binding.menuView, overrideMode, uiStore, requests) {
-            config.singleLine = uiStore.proxySingleLine
+            config.proxyLine = uiStore.proxyLine
         }
     }
 
@@ -84,22 +83,6 @@ class ProxyDesign(
         }
     }
 
-    suspend fun requestDonate() {
-        withContext(Dispatchers.Main) {
-            val title = context.getText(R.string.request_donate)
-            val message = context.getText(R.string.request_donate_tips)
-
-            if (title.isNotEmpty() && message.isNotEmpty()) {
-                MaterialAlertDialogBuilder(context)
-                    .setTitle(R.string.request_donate)
-                    .setMessage(R.string.request_donate_tips)
-                    .setPositiveButton(R.string.ok) { _, _ -> }
-                    .setCancelable(true)
-                    .show()
-            }
-        }
-    }
-
     suspend fun showModeSwitchTips() {
         withContext(Dispatchers.Main) {
             Toast.makeText(context, R.string.mode_switch_tips, Toast.LENGTH_LONG).show()
@@ -125,7 +108,7 @@ class ProxyDesign(
             binding.urlTestFloatView.visibility = View.GONE
         } else {
             binding.urlTestFloatView.supportImageTintList = ColorStateList.valueOf(
-                context.resolveThemedColor(R.attr.colorOnPrimary)
+                context.resolveThemedColor(com.google.android.material.R.attr.colorOnPrimary)
             )
 
             binding.pagesView.apply {

@@ -1,28 +1,28 @@
 package tunnel
 
 import (
-	C "github.com/Dreamacro/clash/constant"
-	"github.com/Dreamacro/clash/tunnel/statistic"
+	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
 func CloseAllConnections() {
-	for _, c := range statistic.DefaultManager.Snapshot().Connections {
+	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
 		_ = c.Close()
-	}
+		return true
+	})
 }
 
-func closeMatch(filter func(conn C.Conn) bool) {
-	for _, c := range statistic.DefaultManager.Snapshot().Connections {
-		if cc, ok := c.(C.Conn); ok {
-			if filter(cc) {
-				_ = cc.Close()
-			}
+func closeMatch(filter func(conn C.Connection) bool) {
+	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
+		if filter(c) {
+			_ = c.Close()
 		}
-	}
+		return true
+	})
 }
 
 func closeConnByGroup(name string) {
-	closeMatch(func(conn C.Conn) bool {
+	closeMatch(func(conn C.Connection) bool {
 		for _, c := range conn.Chains() {
 			if c == name {
 				return true

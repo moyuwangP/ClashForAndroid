@@ -40,7 +40,7 @@ class Picker(private val context: Context) {
         if (path.uuid == null) {
             return VirtualDocument(
                 "",
-                context.getString(R.string.clash_for_android),
+                context.getString(R.string.clash_meta_for_android),
                 DocumentsContract.Document.MIME_TYPE_DIR,
                 0,
                 0,
@@ -133,7 +133,8 @@ class Picker(private val context: Context) {
                 imported.name,
                 imported.type,
                 imported.source,
-                imported.interval
+                imported.interval,
+                0,0,0,0
             )
         )
 

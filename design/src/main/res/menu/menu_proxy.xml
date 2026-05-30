@@ -23,9 +23,6 @@
                 <item
                     android:id="@+id/rule_mode"
                     android:title="@string/rule_mode" />
-                <item
-                    android:id="@+id/script_mode"
-                    android:title="@string/script_mode" />
             </group>
         </menu>
     </item>
@@ -36,8 +33,12 @@
                     android:id="@+id/single"
                     android:title="@string/single" />
                 <item
+                    android:id="@+id/doubles"
+                    android:title="@string/doubles" />
+                <item
                     android:id="@+id/multiple"
                     android:title="@string/multiple" />
+
             </group>
         </menu>
     </item>
